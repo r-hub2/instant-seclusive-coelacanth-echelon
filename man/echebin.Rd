@@ -81,6 +81,8 @@ Typical values of \code{n.sim} are 99, 999, 9999, ...
 \code{\link{echelon}} for the echelon analysis.
 
 \code{\link{echepoi}} for cluster detection based on echelons using Poisson model.
+
+\code{\link{echenor}} for cluster detection based on echelons using Normal model.
 }
 
 \examples{

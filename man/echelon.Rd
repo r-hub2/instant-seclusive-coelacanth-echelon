@@ -105,7 +105,7 @@ The functions \code{Sf::st_read} and \code{spdep::poly2nb} are helpful for creat
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
-\code{\link{echepoi}} and \code{\link{echebin}} for cluster detection based on echelons.
+\code{\link{echepoi}}, \code{\link{echebin}} and \code{\link{echenor}} for cluster detection based on echelons.
 }
 
 \examples{

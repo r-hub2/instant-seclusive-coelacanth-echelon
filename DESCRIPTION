@@ -1,7 +1,7 @@
 Package: echelon
 Title: The Echelon Analysis and the Detection of Spatial Clusters using
         Echelon Scan Method
-Version: 0.3.1
+Version: 0.4.0
 Authors@R: person(given = "Fumio",
                   family = "Ishioka",
                   role = c("aut", "cre"),
@@ -9,13 +9,13 @@ Authors@R: person(given = "Fumio",
 Description: Functions for the echelon analysis proposed by Myers et al. (1997) <doi:10.1023/A:1018518327329>, and the detection of spatial clusters using echelon scan method proposed by Kurihara (2003) <doi:10.20551/jscswabun.15.2_171>.
 License: GPL-3
 Depends: R (>= 4.1.0)
-Suggests: sf, spData
+Suggests: sf, spData, spdep, mapview
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 LinkingTo: Rcpp
 Imports: Rcpp
 NeedsCompilation: yes
-Packaged: 2025-03-21 02:59:29 UTC; fishioka
+Packaged: 2025-08-07 05:27:50 UTC; fishioka
 Author: Fumio Ishioka [aut, cre]
 Maintainer: Fumio Ishioka <fishioka@okayama-u.ac.jp>

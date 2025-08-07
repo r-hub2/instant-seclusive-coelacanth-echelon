@@ -2,7 +2,7 @@
 # Main and scan program for Monte Carlo
 #-------------------------------------------------------------------------------
 e.main.monte <- function(x, rin, K, Kmin, par1, par2, type){
-	
+
   if(type == 11){
     cas <- x
     ex <- par1
@@ -23,7 +23,17 @@ e.main.monte <- function(x, rin, K, Kmin, par1, par2, type){
     ctl <- par2 - cas
     x <- -x/ctl
   }
-  dat <- x
+   else if(type == 31){
+    val <- par1[x]
+    weight <- par2[x]
+    x <- val*weight
+  }
+  else if(type == 32){
+    val <- par1[x]
+    weight <- par2[x]
+    x <- -val*weight
+  }
+ dat <- x
 
 
 #-------------------------------------------------------------------------------
@@ -453,7 +463,31 @@ e.main.monte <- function(x, rin, K, Kmin, par1, par2, type){
       }
 
 # Normal model
+      if(type == 31 || type == 32){
+	      TotalWeight <- sum(weight)
+        WeightedMean <- sum(val*weight)/TotalWeight
+        WeightedVar <- sum(weight*(val - WeightedMean)^2)/(TotalWeight - mean(weight))
 
+        log.lambda <- numeric(nrow(reg_data))
+        for(i in 1:nrow(reg_data)){
+          Z <- reg_data[i,][!is.na(reg_data[i,])]
+          WeightedMeanIn <- sum(val[Z] * weight[Z])/sum(weight[Z])
+          WeightedMeanOut <- sum(val[-Z] * weight[-Z])/(TotalWeight - sum(weight[Z]))
+
+          if(type == 31 && WeightedMeanIn < WeightedMeanOut){
+            log.lambda[i] <- 0
+            next
+          }
+          if(type == 32 && WeightedMeanIn > WeightedMeanOut){
+            log.lambda[i] <- 0
+            next
+          }
+
+          WeightedVarInOut <- sum(c(weight[Z] * (val[Z] - WeightedMeanIn)^2, weight[-Z]*(val[-Z] - WeightedMeanOut)^2))/(TotalWeight - mean(weight))
+          log.lambda[i] <- length(x)/2 * (log(WeightedVar) - log(WeightedVarInOut))
+        }
+        maxLLR <- max(log.lambda) 
+      }
     }
     else maxLLR <- -1
   }

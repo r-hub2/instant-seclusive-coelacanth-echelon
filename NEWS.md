@@ -1,3 +1,7 @@
+# echelon 0.4.0
+
+* Added `echenor()` for normal model support.
+
 # echelon 0.3.1
 
 * Optimized part of the source code.
