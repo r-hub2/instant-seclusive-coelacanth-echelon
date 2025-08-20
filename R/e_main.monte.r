@@ -484,7 +484,7 @@ e.main.monte <- function(x, rin, K, Kmin, par1, par2, type){
           }
 
           WeightedVarInOut <- sum(c(weight[Z] * (val[Z] - WeightedMeanIn)^2, weight[-Z]*(val[-Z] - WeightedMeanOut)^2))/(TotalWeight - mean(weight))
-          log.lambda[i] <- length(x)/2 * (log(WeightedVar) - log(WeightedVarInOut))
+          log.lambda[i] <- length(val)/2 * (log(WeightedVar) - log(WeightedVarInOut))
         }
         maxLLR <- max(log.lambda) 
       }

@@ -86,51 +86,60 @@ Typical values of \code{n.sim} are 99, 999, 9999, ...
 }
 
 \examples{
-##Hotspot detection for non-white birth of North Carolina using echelon scan
+##Hotspot detection for non-white birth in North Carolina using echelon scan
 
-#Non-white birth from 1974 to 1984 (case data)
+#Load required packages and data
 library(spData)
 data("nc.sids")
+
+#Non-white birth from 1974 to 1984 (case data)
 nwb <- nc.sids$NWBIR74 + nc.sids$NWBIR79
 
 #White birth from 1974 to 1984 (control data)
 wb <- (nc.sids$BIR74 - nc.sids$NWBIR74) + (nc.sids$BIR79 - nc.sids$NWBIR79)
 
 #Hotspot detection based on Binomial model
-nwb.echelon <- echelon(x = nwb/wb, nb = ncCR85.nb, name = row.names(nc.sids))
-echebin(nwb.echelon, cas = nwb, ctl = wb, K = 20,
-  main = "Hgih rate clusters", ens = FALSE)
-text(nwb.echelon$coord, labels = nwb.echelon$regions.name,
+SIDS.echelon <- echelon(x = nwb/wb, nb = ncCR85.nb, name = row.names(nc.sids))
+SIDS.clusters <- echebin(SIDS.echelon, cas = nwb, ctl = wb, K = 20,
+  cluster.info = TRUE, main = "Hgih rate clusters", ens = FALSE)
+text(SIDS.echelon$coord, labels = SIDS.echelon$regions.name,
   adj = -0.1, cex = 0.7)
 
 #Detected clusters and neighbors map
 #XY coordinates of each polygon centroid point
 NC.coo <- cbind(nc.sids$lon, nc.sids$lat)
-echebin(nwb.echelon, cas = nwb, ctl = wb, K = 20,
+echebin(SIDS.echelon, cas = nwb, ctl = wb, K = 20,
   coo = NC.coo, dendrogram = FALSE)
 
-\donttest{
-##Detected clusters map
-#Here is an example using the sf class "sf"
-nwb.clusters <- echebin(nwb.echelon, cas = nwb,
-   ctl = wb, K = 20, dendrogram = FALSE)
-MLC <- nwb.clusters$clusters[[1]]
-Secondary <- nwb.clusters$clusters[[2]]
-cluster.col <- rep(0,times=length(nwb))
+#Load geospatial information for North Carolina
+nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"))
+
+#Extract detected clusters
+MLC <- SIDS.clusters$clusters[[1]]
+Secondary <- SIDS.clusters$clusters[[2]]
+
+#Assign colors to clusters for plotting
+cluster.col <- rep(0, length(nwb))
 cluster.col[MLC$regionsID] <- 2
 cluster.col[Secondary$regionsID] <- 3
 
-library(sf)
-nc <- st_read(system.file("shape/nc.shp", package = "sf"))
-plot(nc$geometry, col = cluster.col,
-main = "Detected high rate clusters")
-text(st_coordinates(st_centroid(st_geometry(nc))),
-  labels = nc$CRESS_ID, cex =0.75)
+#Plot detected high-rate clusters on a simple map
+plot(nc$geom, col = cluster.col, 
+  main = "Detected high rate clusters")
 legend("bottomleft",
-c(paste("1- p-value:", MLC$p),
-  paste("2- p-value:", Secondary$p)),
-  text.col = c(2,3))
-}
+  legend = c(
+    paste("1- p-value:", MLC$p),
+    paste("2- p-value:", Secondary$p)
+  ),
+  text.col = c(2, 3)
+)
+
+#Interactive map visualization with mapview
+library(mapview)
+nc$cluster.col <- cluster.col
+mapview(nc, zcol = "cluster.col", 
+  col.regions=c("white", "red", "green"), 
+  label = "NAME", legend=FALSE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

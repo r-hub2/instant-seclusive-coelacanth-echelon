@@ -87,9 +87,9 @@ Typical values of \code{n.sim} are 99, 999, 9999, ...
 }
 
 \examples{
-##Hotspot detection for SIDS data of North Carolina using echelon scan
+##Hotspot detection for SIDS cases in North Carolina using echelon scan
 
-#Mortality rate per 1,000 live births from 1974 to 1984
+#Load required packages and data
 library(spData)
 data("nc.sids")
 SIDS.cas <- nc.sids$SID74 + nc.sids$SID79
@@ -98,8 +98,8 @@ SIDS.rate <- SIDS.cas * 1000 / SIDS.pop
 
 #Hotspot detection based on Poisson model
 SIDS.echelon <- echelon(x = SIDS.rate, nb = ncCR85.nb, name = row.names(nc.sids))
-echepoi(SIDS.echelon, cas = SIDS.cas, pop = SIDS.pop, K = 20,
-  main = "Hgih rate clusters", ens = FALSE)
+SIDS.clusters <- echepoi(SIDS.echelon, cas = SIDS.cas, pop = SIDS.pop, K = 20,
+  cluster.info = TRUE, main = "Hgih rate clusters", ens = FALSE)
 text(SIDS.echelon$coord, labels = SIDS.echelon$regions.name,
   adj = -0.1, cex = 0.7)
 
@@ -109,28 +109,35 @@ NC.coo <- cbind(nc.sids$lon, nc.sids$lat)
 echepoi(SIDS.echelon, cas = SIDS.cas, pop = SIDS.pop, K = 20,
   coo = NC.coo, dendrogram = FALSE)
 
-\donttest{
-##Detected clusters map
-#Here is an example using the sf class "sf"
-SIDS.clusters <- echepoi(SIDS.echelon, cas = SIDS.cas,
-  pop = SIDS.pop, K = 20, dendrogram = FALSE)
+#Load geospatial information for North Carolina
+nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"))
+
+#Extract detected clusters
 MLC <- SIDS.clusters$clusters[[1]]
 Secondary <- SIDS.clusters$clusters[[2]]
-cluster.col <- rep(0,times=length(SIDS.rate))
+
+#Assign colors to clusters for plotting
+cluster.col <- rep(0, length(SIDS.rate))
 cluster.col[MLC$regionsID] <- 2
 cluster.col[Secondary$regionsID] <- 3
 
-library(sf)
-nc <- st_read(system.file("shape/nc.shp", package = "sf"))
-plot(nc$geometry, col = cluster.col,
-main = "Detected high rate clusters")
-text(st_coordinates(st_centroid(st_geometry(nc))),
-  labels = nc$CRESS_ID, cex =0.75)
+#Plot detected high-rate clusters on a simple map
+plot(nc$geom, col = cluster.col, 
+  main = "Detected high rate clusters")
 legend("bottomleft",
-  c(paste("1- p-value:", MLC$p),
-  paste("2- p-value:", Secondary$p)),
-  text.col = c(2,3))
-}
+  legend = c(
+    paste("1- p-value:", MLC$p),
+    paste("2- p-value:", Secondary$p)
+  ),
+  text.col = c(2, 3)
+)
+
+#Interactive map visualization with mapview
+library(mapview)
+nc$cluster.col <- cluster.col
+mapview(nc, zcol = "cluster.col", 
+  col.regions=c("white", "red", "green"), 
+  label = "NAME", legend=FALSE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

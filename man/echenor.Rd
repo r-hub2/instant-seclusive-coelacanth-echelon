@@ -82,58 +82,61 @@ Typical values of \code{n.sim} are 99, 999, 9999, ...
 }
 
 \examples{
-##Hotspot detection for predicting median housing values in Boston
+##Hotspot detection for predicting SIDS rate in North Carolina using echelon scan
 
-#Load data and build a predictive model
+#Load required packages and data
 library(spData)
-data("boston")
-gp0 <- lm(log(CMEDV) ~ CRIM + ZN + INDUS + CHAS + I(NOX^2) + I(RM^2) +
-  AGE + log(DIS) + log(RAD) + TAX + PTRATIO + B + log(LSTAT), data = boston.c)
-pred <- predict(gp0, newdata = boston.c, se.fit = TRUE)
+data("nc.sids")
+SIDS.cas <- nc.sids$SID74 + nc.sids$SID79
+SIDS.pop <- nc.sids$BIR74 + nc.sids$BIR79
+SIDS.nwpop <- nc.sids$NWBIR74 + nc.sids$NWBIR79
+SIDS.rate <- SIDS.cas * 1000 / SIDS.pop
 
-#Extract predicted values and calculate reliability weights (inverse of standard error)
-V <- gp0$fitted.values
+#Fit a linear model: SIDS rate explained by proportion of non-white births
+res <- lm(SIDS.rate ~ I(SIDS.nwpop / SIDS.pop))
+summary(res)
+
+#Predicted values and reliability weights (inverse of standard error)
+pred <- predict(res, newdata = nc.sids, se.fit = TRUE)
+V <- res$fitted.values
 W <- 1 / (pred$se.fit + 1e-6)
 
-#Load geospatial information for Boston housing tracts
-boston.tr <- sf::st_read(system.file("shapes/boston_tracts.gpkg",
-                           package="spData")[1])
-boston.nb <- spdep::poly2nb(boston.tr)
-
 #Hotspot detection based on Normal model
-gp.echelon <- echelon(x = V, nb = boston.nb)
-gp.clusters <- echenor(gp.echelon, val = V, weight = W, K = 40, cluster.info = TRUE, 
-  main = "Hgih value clusters", ens = FALSE)
+SIDS.echelon <- echelon(x = V, nb = ncCR85.nb, name = row.names(nc.sids))
+SIDS.clusters <- echenor(SIDS.echelon, val = V, weight = W, K = 20,
+  cluster.info = TRUE, main = "Hgih value clusters", ens = FALSE)
+text(SIDS.echelon$coord, labels = SIDS.echelon$regions.name,
+  adj = -0.1, cex = 0.7)
+
+#Load geospatial information for North Carolina
+nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"))
 
 #Extract detected clusters
-MLC <- gp.clusters$clusters[[1]]
-Secondary1 <- gp.clusters$clusters[[2]]
-Secondary2 <- gp.clusters$clusters[[3]]
+MLC <- SIDS.clusters$clusters[[1]]
+Secondary <- SIDS.clusters$clusters[[2]]
 
 #Assign colors to clusters for plotting
 cluster.col <- rep(0, length(V))
 cluster.col[MLC$regionsID] <- 2
-cluster.col[Secondary1$regionsID] <- 3
-cluster.col[Secondary2$regionsID] <- 4
+cluster.col[Secondary$regionsID] <- 3
 
 #Plot detected high-value clusters on a simple map
-plot(boston.tr$geom, col = cluster.col, 
+plot(nc$geom, col = cluster.col, 
   main = "Detected high value clusters")
 legend("bottomleft",
   legend = c(
     paste("1- p-value:", MLC$p),
-    paste("2- p-value:", Secondary1$p),
-    paste("3- p-value:", Secondary2$p)
+    paste("2- p-value:", Secondary$p)
   ),
-  text.col = c(2, 3, 4)
+  text.col = c(2, 3)
 )
 
-#Interactive map visualization using mapview
+#Interactive map visualization with mapview
 library(mapview)
-boston.tr$cluster.col <- cluster.col
-mapview(boston.tr, zcol = "cluster.col", 
-  col.regions=c("white", "red", "orange", "yellow"), 
-  label = "TOWN", legend=FALSE)
+nc$cluster.col <- cluster.col
+mapview(nc, zcol = "cluster.col", 
+  col.regions=c("white", "red", "green"), 
+  label = "NAME", legend=FALSE)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
