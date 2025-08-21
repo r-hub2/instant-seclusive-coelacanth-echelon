@@ -180,8 +180,10 @@ echenor <-
   if(n.sim != 0){
     cat(paste("\n Monte Carlo rank ........: ", p_rank[1], "/", (n.sim + 1 - length(monte_lost)), "", sep=""))
     cat(paste("\n P-value .................: ", round(p_rank[1]/(n.sim + 1 - length(monte_lost)), digits=nchar(as.character(n.sim))+1), "", sep=""))
-    MLC <- c(MLC,list(p=p_rank[1]/(n.sim+1)))
+    MLC <- c(MLC, list(p = p_rank[1]/(n.sim + 1)))
   }
+  else MLC <- c(MLC, list(p = NA))
+
   cat("\n\n")
   clusters <- MLC
 
@@ -228,9 +230,11 @@ echenor <-
           cat(paste("\n Monte Carlo rank ........: ", p_rank[i], "/", (n.sim + 1 - length(monte_lost)), "", sep=""))
           cat(paste("\n P-value .................: ", round(p_rank[i]/(n.sim + 1 - length(monte_lost)), digits=nchar(as.character(n.sim))+1), "", sep=""))
         }
-        secondC <- c(secondC, list(p = p_rank[i]/(n.sim+1)))
+        secondC <- c(secondC, list(p = p_rank[i]/(n.sim + 1)))
       }
-      if(i == 2) clusters <- list(clusters, secondC)
+      else secondC <- c(secondC, list(p = NA))
+
+     if(i == 2) clusters <- list(clusters, secondC)
       else clusters[[i]] <- secondC
       if(cluster.info) cat("\n\n")
     }
@@ -249,6 +253,7 @@ echenor <-
           wmean_inZ = WeightedMeanIn, wmean_outZ = WeightedMeanOut, wvar_Z = WeightedVarInOut,
           LLR = cluster_log.lambda[i]))
         if(n.sim != 0) secondC <- c(secondC,list(p = p_rank[i]/(n.sim + 1 - length(monte_lost))))
+        else secondC <- c(secondC, list(p = NA))
         clusters[[i]] <- secondC
       }
     }

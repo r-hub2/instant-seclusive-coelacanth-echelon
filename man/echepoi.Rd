@@ -96,10 +96,18 @@ SIDS.cas <- nc.sids$SID74 + nc.sids$SID79
 SIDS.pop <- nc.sids$BIR74 + nc.sids$BIR79
 SIDS.rate <- SIDS.cas * 1000 / SIDS.pop
 
-#Hotspot detection based on Poisson model
+##Hotspot detection based on Poisson model
+#Echelon analysis
 SIDS.echelon <- echelon(x = SIDS.rate, nb = ncCR85.nb, name = row.names(nc.sids))
+
+#Basic cluster detection (significance not evaluated)
 SIDS.clusters <- echepoi(SIDS.echelon, cas = SIDS.cas, pop = SIDS.pop, K = 20,
-  cluster.info = TRUE, main = "Hgih rate clusters", ens = FALSE)
+  n.sim = 0, cluster.info = TRUE, main = "Hgih rate clusters", ens = FALSE)
+\donttest{
+#Significance assessment of clusters using Monte Carlo simulation
+SIDS.clusters <- echepoi(SIDS.echelon, cas = SIDS.cas, pop = SIDS.pop, K = 20,
+  n.sim = 199, cluster.info = TRUE, main = "Hgih rate clusters", ens = FALSE)
+}
 text(SIDS.echelon$coord, labels = SIDS.echelon$regions.name,
   adj = -0.1, cex = 0.7)
 
@@ -107,7 +115,7 @@ text(SIDS.echelon$coord, labels = SIDS.echelon$regions.name,
 #XY coordinates of each polygon centroid point
 NC.coo <- cbind(nc.sids$lon, nc.sids$lat)
 echepoi(SIDS.echelon, cas = SIDS.cas, pop = SIDS.pop, K = 20,
-  coo = NC.coo, dendrogram = FALSE)
+  n.sim = 0, coo = NC.coo, dendrogram = FALSE)
 
 #Load geospatial information for North Carolina
 nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"))

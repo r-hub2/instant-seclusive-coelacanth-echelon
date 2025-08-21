@@ -70,7 +70,7 @@ echepoi <-
 
   term1 <- cz*log(cz/ez)
   term1[is.nan(term1)] <- 0
-  term2 <- (cg-cz)*log((cg-cz)/(eg-ez))
+  term2 <- (cg - cz) * log((cg - cz)/(eg - ez))
   term2[is.nan(term2)] <- 0
   log.lambda <- term1 + term2
 
@@ -178,8 +178,10 @@ echepoi <-
   if(n.sim != 0){
     cat(paste("\n Monte Carlo rank ........: ", p_rank[1], "/", (n.sim + 1 - length(monte_lost)), "", sep=""))
     cat(paste("\n P-value .................: ", round(p_rank[1]/(n.sim + 1 - length(monte_lost)), digits=nchar(as.character(n.sim))+1), "", sep=""))
-    MLC <- c(MLC,list(p=p_rank[1]/(n.sim+1)))
+    MLC <- c(MLC,list(p = p_rank[1]/(n.sim + 1)))
   }
+  else MLC <- c(MLC, list(p = NA))
+
   cat("\n\n")
   clusters <- MLC
 
@@ -224,8 +226,10 @@ echepoi <-
           cat(paste("\n Monte Carlo rank ........: ", p_rank[i], "/", (n.sim + 1 - length(monte_lost)), "", sep=""))
           cat(paste("\n P-value .................: ", round(p_rank[i]/(n.sim + 1 - length(monte_lost)), digits=nchar(as.character(n.sim))+1), "", sep=""))
         }
-        secondC <- c(secondC, list(p = p_rank[i]/(n.sim+1)))
+        secondC <- c(secondC, list(p = p_rank[i]/(n.sim + 1)))
       }
+      else secondC <- c(secondC, list(p = NA))
+
       if(i == 2) clusters <- list(clusters, secondC)
       else clusters[[i]] <- secondC
       if(cluster.info) cat("\n\n")
@@ -245,6 +249,7 @@ echepoi <-
         ex_inZ <- sum(ex[cluster_reg[i,]], na.rm = TRUE)
         secondC <- c(secondC, list(cas_inZ = cas_inZ, ex_inZ = ex_inZ, LLR = cluster_log.lambda[i]))
         if(n.sim != 0) secondC <- c(secondC,list(p = p_rank[i]/(n.sim + 1 - length(monte_lost))))
+        else secondC <- c(secondC, list(p = NA))
         clusters[[i]] <- secondC
       }
     }

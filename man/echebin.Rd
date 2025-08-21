@@ -98,10 +98,18 @@ nwb <- nc.sids$NWBIR74 + nc.sids$NWBIR79
 #White birth from 1974 to 1984 (control data)
 wb <- (nc.sids$BIR74 - nc.sids$NWBIR74) + (nc.sids$BIR79 - nc.sids$NWBIR79)
 
-#Hotspot detection based on Binomial model
+##Hotspot detection based on Binomial model
+#Echelon analysis
 SIDS.echelon <- echelon(x = nwb/wb, nb = ncCR85.nb, name = row.names(nc.sids))
+
+#Basic cluster detection (significance not evaluated)
 SIDS.clusters <- echebin(SIDS.echelon, cas = nwb, ctl = wb, K = 20,
-  cluster.info = TRUE, main = "Hgih rate clusters", ens = FALSE)
+  n.sim = 0, cluster.info = TRUE, main = "Hgih rate clusters", ens = FALSE)
+\donttest{
+#Significance assessment of clusters using Monte Carlo simulation
+SIDS.clusters <- echebin(SIDS.echelon, cas = nwb, ctl = wb, K = 20,
+  n.sim = 199, cluster.info = TRUE, main = "Hgih rate clusters", ens = FALSE)
+}
 text(SIDS.echelon$coord, labels = SIDS.echelon$regions.name,
   adj = -0.1, cex = 0.7)
 
@@ -109,7 +117,7 @@ text(SIDS.echelon$coord, labels = SIDS.echelon$regions.name,
 #XY coordinates of each polygon centroid point
 NC.coo <- cbind(nc.sids$lon, nc.sids$lat)
 echebin(SIDS.echelon, cas = nwb, ctl = wb, K = 20,
-  coo = NC.coo, dendrogram = FALSE)
+  n.sim = 0, coo = NC.coo, dendrogram = FALSE)
 
 #Load geospatial information for North Carolina
 nc <- sf::st_read(system.file("shape/nc.shp", package = "sf"))

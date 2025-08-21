@@ -101,10 +101,18 @@ pred <- predict(res, newdata = nc.sids, se.fit = TRUE)
 V <- res$fitted.values
 W <- 1 / (pred$se.fit + 1e-6)
 
-#Hotspot detection based on Normal model
+##Hotspot detection based on Normal model
+#Echelon analysis
 SIDS.echelon <- echelon(x = V, nb = ncCR85.nb, name = row.names(nc.sids))
+
+#Basic cluster detection (significance not evaluated)
 SIDS.clusters <- echenor(SIDS.echelon, val = V, weight = W, K = 20,
-  cluster.info = TRUE, main = "Hgih value clusters", ens = FALSE)
+  n.sim = 0, cluster.info = TRUE, main = "Hgih value clusters", ens = FALSE)
+\donttest{
+#Significance assessment of clusters using Monte Carlo simulation
+SIDS.clusters <- echenor(SIDS.echelon, val = V, weight = W, K = 20,
+  n.sim = 199, cluster.info = TRUE, main = "Hgih value clusters", ens = FALSE)
+}
 text(SIDS.echelon$coord, labels = SIDS.echelon$regions.name,
   adj = -0.1, cex = 0.7)
 
